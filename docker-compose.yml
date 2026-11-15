@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16
+    container_name: grapedesk-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: grapedesk
+      POSTGRES_USER: grapedesk
+      POSTGRES_PASSWORD: grapedesk
+    ports:
+      - "5432:5432"
+    volumes:
+      - grapedesk-data:/var/lib/postgresql/data
+
+  api:
+    profiles: ["full"]
+    build: ./backend
+    container_name: grapedesk-api
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/grapedesk
+      DB_USER: grapedesk
+      DB_PASSWORD: grapedesk
+      JWT_SECRET: troque-esta-chave-por-uma-bem-longa-e-secreta-123456
+      CORS_ORIGINS: http://localhost:4200
+      UPLOAD_DIR: /app/uploads
+    ports:
+      - "8080:8080"
+    volumes:
+      - grapedesk-uploads:/app/uploads
+
+volumes:
+  grapedesk-data:
+  grapedesk-uploads:
